@@ -1,0 +1,205 @@
+int stop_distance = 12;// Khoảng cách phát hiện vật cản
+int trigPin = 8; // kết nối chân trig với chân 10 arduino
+int echoPin = 10; // kết nối chân echo với chân 9 arduino
+//ket noi voi den
+int den =13;
+
+//kết nối của 3 cảm biến hồng ngoại (dò line )
+int L_S =11;  // cb dò line trái
+int S_S =12;  // cb dò line giữa
+int R_S =2; //cb dò line phải
+  
+int left_sensor_state;// biến lưu cảm biến hồng ngoại line trái
+int s_sensor_state;   // biến lưu cảm biến hồng ngoại line giữa
+int right_sensor_state;// biến lưu cảm biến hồng ngoại line phải
+
+long duration; // 
+int distance;  // biến khoảng cách
+
+//Motor A
+int enA = 9;
+int in1 = 4;
+int in2 = 5;
+//Motor B
+int in3 = 6;
+int in4 = 7;
+int enB = 3;
+
+void setup()
+{
+  pinMode(enA, OUTPUT);
+  pinMode(in1, OUTPUT);
+  pinMode(in2, OUTPUT);
+  pinMode(enB,OUTPUT);
+  pinMode(in3, OUTPUT);
+  pinMode(in4, OUTPUT);
+  pinMode(trigPin, OUTPUT); 
+  pinMode(echoPin, INPUT);
+  pinMode(den,OUTPUT);
+  tatden();
+}
+
+void tien()
+{
+  //Running motor A
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  analogWrite(enA, 100);
+  //Running motor B
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  analogWrite(enB, 100); // tien
+}
+
+void lui() 
+{
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, HIGH);
+  analogWrite(enA, 70);
+  
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, HIGH); // lui
+  analogWrite(enB, 70);
+}
+
+void dung() 
+{
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+}
+void retrai() 
+{
+  digitalWrite(in1, HIGH);
+  digitalWrite(in2, LOW);
+  analogWrite(enA, 90);
+  
+  //Running motor B
+  digitalWrite(in3, LOW);
+  digitalWrite(in4, LOW);
+  analogWrite(enB, 0); 
+}
+
+void rephai() 
+{
+  digitalWrite(in1, LOW);
+  digitalWrite(in2, LOW);
+  analogWrite(enA, 200);
+  
+  //Running motor B
+  digitalWrite(in3, HIGH);
+  digitalWrite(in4, LOW);
+  analogWrite(enB, 90); 
+}
+void batden() {
+  digitalWrite(den,HIGH);
+}
+
+void tatden() {
+  digitalWrite(den,LOW);
+}
+void loop()
+{
+  digitalWrite(trigPin, LOW);
+  delayMicroseconds(2);
+  digitalWrite(trigPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(trigPin, LOW);
+  duration = pulseIn(echoPin, HIGH);
+  distance= duration*0.034/2;
+  Serial.print("Distance: ");
+  Serial.println(distance);
+
+  left_sensor_state = digitalRead(L_S);
+  s_sensor_state = digitalRead(S_S);
+  right_sensor_state = digitalRead(R_S);
+  tatden();
+
+  if ((digitalRead(L_S) == 0)&&(digitalRead(S_S) == 1)&&(digitalRead(R_S) == 0)){tien();  }// đi tiến
+
+  if ((digitalRead(L_S) == 1)&&(digitalRead(S_S) == 1)&&(digitalRead(R_S) == 0)){retrai(); } // rẻ trái
+  if ((digitalRead(L_S) == 1)&&(digitalRead(S_S) ==0)&&(digitalRead(R_S) == 0)) {retrai();  } // rẻ trái
+
+  if ((digitalRead(L_S) == 0)&&(digitalRead(S_S) == 1)&&(digitalRead(R_S) == 1)){rephai(); } // rẻ phải
+  if ((digitalRead(L_S) == 0)&&(digitalRead(S_S) == 0)&&(digitalRead(R_S) == 1)){rephai();  }// rẻ phải
+
+  if ((digitalRead(L_S) == 1)&&(digitalRead(S_S) == 1)&&(digitalRead(R_S) == 1)){dung(); tatden();} // stop
+ 
+
+ if(distance < stop_distance) // nếu khoảng cách nhỏ hơn giới hạn 
+ {
+  batden();
+  
+  digitalWrite (in1,LOW);// cho xe robot chạy lùi 1 đoạn
+  digitalWrite(in2,HIGH);                       
+  digitalWrite (in3,LOW);
+  digitalWrite(in4,HIGH);
+  analogWrite (enA, 80);
+  analogWrite (enB, 80);
+  delay(500);
+
+  dung();
+  delay(300);
+  
+  digitalWrite (in1,LOW);// cho xe robot re phai 
+  digitalWrite(in2,LOW);                       
+  digitalWrite (in3,HIGH);
+  digitalWrite(in4,LOW);
+  analogWrite (enA, 90);
+  analogWrite (enB, 90);
+  delay(600);
+
+  digitalWrite (in1,HIGH); //cho xe robot ĐI THẲNG1 1 đoạn
+  digitalWrite(in2,LOW);                       
+  digitalWrite (in3,HIGH);
+  digitalWrite(in4,LOW);
+  analogWrite (enA, 70);
+  analogWrite (enB, 70);
+  delay(800);
+
+
+  digitalWrite (in1,HIGH);// cho xe robot re trái 1 đoạn có thể thay đổi
+  digitalWrite(in2,LOW);                       
+  digitalWrite (in3,LOW);
+  digitalWrite(in4,LOW);
+  analogWrite (enA, 110);
+  analogWrite (enB, 110);
+  delay(800);
+ 
+  ///////////////////
+  digitalWrite (in1,HIGH); //cho xe robot ĐI THẲNG
+  digitalWrite(in2,LOW);                       
+  digitalWrite (in3,HIGH);
+  digitalWrite(in4,LOW);
+  analogWrite (enA, 70);
+  analogWrite (enB, 70);
+  delay(1200);
+
+////////////////////////
+  digitalWrite (in1,HIGH); //cho xe robot re trai
+  digitalWrite(in2,LOW);                       
+  digitalWrite (in3,LOW);
+  digitalWrite(in4,LOW);
+  analogWrite (enA, 70);
+  analogWrite (enB, 70);
+  delay(800);
+  
+  digitalWrite (in1,HIGH); //cho xe robot ĐI THẲNG
+  digitalWrite(in2,LOW);                       
+  digitalWrite (in3,HIGH);
+  digitalWrite(in4,LOW);
+  analogWrite (enA, 70);
+  analogWrite (enB, 70);
+
+  while(left_sensor_state == LOW){
+
+  left_sensor_state = digitalRead(L_S);
+  s_sensor_state = digitalRead(S_S);
+  right_sensor_state = digitalRead(R_S);
+  Serial.println("in the first while");
+  
+ }
+
+}
+}
